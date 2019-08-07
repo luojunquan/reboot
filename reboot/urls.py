@@ -20,5 +20,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     # path('users/',include('users.urls'),name='users'),
     path("", include('users.urls')),
+    path("", include('cmdb.urls')),
     # path('workorder/',include('workorder.urls'),name='workorder'),
 ]

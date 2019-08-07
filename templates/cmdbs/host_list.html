@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load pagination_tags %}
+{% block title %}主机管理列表{% endblock %}
+{% block breadcrunb %}
+<h1>主机管理列表</h1>
+<ol class="breadcrumb">
+    <li><a href="{% url 'users:index' %}"><i class="fa fa-dashboard"></i> Home</a></li>
+    <li class="active">主机管理列表</li>
+</ol>
+{% endblock %}
+{% block content %}
+    {% autopaginate objects 3 %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>id</th>
+                <th>主机名</th>
+                <th>内网ip</th>
+                <th>cpu</th>
+                <th>制造商</th>
+                <th>创建时间</th>
+                <th>更新时间</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for obj in objects %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ obj.id }}</td>
+                <td>{{ obj.hostname }}</td>
+                <td>{{ obj.private_ip }}</td>
+                <td>{{ obj.cpu }}</td>
+                <td>{{ obj.manufacturers }}</td>
+                <td>{{ obj.create_time }}</td>
+                <td>{{ obj.update_time }}</td>
+                <td>
+                    <button>
+                    <a class="btn btn-danger" href="/host_delete/{{ obj.id }}/">删除</a>
+                        </button>
+                    <button type="button" class="btn btn-info">修改</button>
+                </td>
+            </tr>
+            {% endfor %}
+
+
+        </tbody>
+    </table>
+    {% paginate %}
+{% endblock %}

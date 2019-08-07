@@ -1,7 +1,5 @@
-
 <!DOCTYPE html>
 <html>
-
 <!-- head骨架部分 -->
 <head>
 
@@ -48,7 +46,7 @@
 <header class="main-header">
 
 <!-- 第一层左上角logo部分 -->
-<a href="#" class="logo">
+<a href="{% url 'users:index' %}" class="logo">
   <!-- 收缩时显示DO -->
   <span class="logo-mini"><b>D</b>O</span>
   <!-- 伸展时显示DevOps -->
@@ -161,7 +159,7 @@
         </span>
       </a>
       <ul class="treeview-menu">
-        <li><a href="{#% url 'cmdb:host_list' %#}"><i class="fa fa-circle-o"></i> 主机管理</a></li>
+        <li><a href="{% url 'cmdb:host_list' %}"><i class="fa fa-circle-o"></i> 主机管理</a></li>
         <li><a href="{#% url 'cmdb:product_detail' 1 %#}"><i class="fa fa-circle-o"></i> 产品线管理</a></li>
       </ul>
     </li>
