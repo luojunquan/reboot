@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'workorder.apps.WorkorderConfig',
     'cmdb.apps.CmdbConfig',
     'dj_pagination',
+    'pure_pagination',
 ]
 
 MIDDLEWARE = [
@@ -75,6 +76,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'reboot.wsgi.application'
+
 
 
 # Database
