@@ -85,15 +85,15 @@
                   <td class="text-center">
                     <div class="btn-group">
                      <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="false">修改<span class="caret"></span></button>
-{#                     <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">#}
-{#                        <li role="presentation"><a role="menuitem" tabindex="-1"#}
-{#                         href="{% url 'users:modify_pwd' %}?uid={{ user.id }}">修改密码</a>#}
-{#                        </li>#}
-{##}
-{#                        <li role="presentation"><a role="menuitem" tabindex="-1"#}
-{#                          href="{% url 'users:user_group_power' user.id  %}"  class="user_group">角色权限修改</a>#}
-{#                        </li>#}
-{#                      </ul>#}
+                     <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                        <li role="presentation"><a role="menuitem" tabindex="-1"
+                         href="{% url 'users:modify_pwd' %}?uid={{ user.id }}">修改密码</a>
+                        </li>
+
+                        <li role="presentation"><a role="menuitem" tabindex="-1"
+                          href="{% url 'users:user_group_power' user.id  %}"  class="user_group">角色权限修改</a>
+                        </li>
+                      </ul>
                     </div>
                     <a class="btn btn-danger btn-sm del" data-id="{{ user.id }}" {% if user.username == 'admin' %} disabled {% endif %}>删除</a>
                    </td>

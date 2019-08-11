@@ -8,13 +8,18 @@
 '''
 将用户方面的View直接分离出来，新建文件夹，在文件夹的init里写相关的代码，需要注意的是要在url里需要注意相关的url
 '''
+from django.contrib.auth.models import Permission, Group
+from django.urls import reverse
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect, QueryDict, Http404
+from django.shortcuts import render
+from django.views import View
 from django.views.generic import ListView, DetailView
 from pure_pagination.mixins import PaginationMixin
 
-from users.forms import UserProfileForm
+from reboot import settings
+from users.forms import UserProfileForm, UserUpdateForm
 from users.models import UserProfile
 
 
@@ -48,7 +53,7 @@ class UserListView(LoginRequiredMixin,PaginationMixin,ListView):
         context = super(UserListView, self).get_context_data()
         context['keyword'] = self.keyword
         return context
-    
+
     def post(self,request):
         _userForm = UserProfileForm(request.POST)
         if _userForm.is_valid():
@@ -64,6 +69,7 @@ class UserListView(LoginRequiredMixin,PaginationMixin,ListView):
             res = {'code': 1, 'result': _userForm.errors.as_json()}
         return JsonResponse(res,safe=True)
 
+#用户描述页，也可以修改用户信息
 class UserDetailView(LoginRequiredMixin,DetailView):
     '''
     用户详情
@@ -72,8 +78,104 @@ class UserDetailView(LoginRequiredMixin,DetailView):
     template_name = 'users/user_edit.html'
     context_object_name = 'user'
 
+    """
+     更新用户信息
+    """
 
+    def post(self, request, **kwargs):
+        print(request.POST)  # <QueryDict: {'id': ['7'], 'username': ['aa'], 'name_cn': ['bb'], 'phone': ['13305779168']}>
+        print(kwargs)  # {'pk': '7'}
+        print(request.body)  # b'id=7&username=aa&name_cn=bb&phone=13305779168'
+        pk = kwargs.get("pk")
+        data = QueryDict(request.body).dict()
+        print(data)  # {'id': '7', 'username': 'aa', 'name_cn': 'bb', 'phone': '13305779168'}
+        _userForm = UserUpdateForm(request.POST)
+        if _userForm.is_valid():
+            try:
+                self.model.objects.filter(pk=pk).update(**data)
+                res = {'code': 0, "next_url": reverse("users:user_list"), 'result': '更新用户成功'}
+            except:
+                res = {'code': 1, "next_url": reverse("users:user_list"), 'errmsg': '更新用户失败'}
 
+        else:
+            # 获取所有的表单错误
+            print(_userForm.errors)
+            res = {'code': 1, "next_url": reverse("users:user_list"), 'errmsg': _userForm.errors}
+        return render(request, settings.JUMP_PAGE, res)
+
+#修改密码页
+class ModifyPwdView(LoginRequiredMixin,View):
+    '''
+    重置密码
+    '''
+    def get(self,request):
+        uid = request.GET.get('uid',None)
+        return render(request,'users/change_passwd.html',{'uid':uid})
+
+    def post(self,request):
+        uid = request.POST.get('uid',None)
+        pwd1 = request.POST.get('password1',"")
+        pwd2 = request.POST.get('password2', "")
+        if pwd1 != pwd2:
+            return render(request,'users/change_passwd.html',{'msg':'两次密码不一致'})
+        try:
+            user = UserProfile.objects.get(pk=uid)
+            user.password = make_password(pwd1)
+            user.save()
+            return HttpResponseRedirect(reverse('users:index'))
+        except:
+            return render(request,"users/change_passwd.html",{'msg':'密码修改失败'})
+
+#用户权限页
+class UserGroupPowerView(LoginRequiredMixin, DetailView):
+    '''
+    更新用户角色及权限
+    '''
+    template_name = 'users/user_group_power.html'
+    model = UserProfile
+    context_object_name = 'user'
+
+    # 返回所有组、权限，并将当前用户所拥有的组、权限显示
+    def get_context_data(self, **kwargs):
+        context = super(UserGroupPowerView, self).get_context_data(**kwargs)
+        context['user_has_groups'], context['user_has_permissions'] = self._get_user_group_power()
+        context['user_not_groups'], context['user_not_permissions'] = self._get_user_not_group_power()
+        return context
+
+    # 获取当前用户所有组、权限以列表形式返回
+    def _get_user_group_power(self):
+        pk = self.kwargs.get(self.pk_url_kwarg)
+        try:
+            user = self.model.objects.get(pk=pk)
+            return user.groups.all(), user.user_permissions.all()
+        except self.model.DoesNotExist:
+            raise Http404
+
+    # 获取当前用户没有的组、权限，以列表形式返回
+    def _get_user_not_group_power(self):
+        pk = self.kwargs.get(self.pk_url_kwarg)
+        try:
+            user = self.model.objects.get(pk=pk)
+            all_group = Group.objects.all()
+            groups = [group for group in all_group if group not in user.groups.all()]
+            all_perms = Permission.objects.all()
+            perms = [perm for perm in all_perms if perm not in user.user_permissions.all()]
+            return groups, perms
+        except:
+            return JsonResponse([], safe=False)
+
+    def post(self, request, **kwargs):
+        group_id_list = request.POST.getlist('groups_selected', [])
+        permission_id_list = request.POST.getlist('perms_selected', [])
+        pk = kwargs.get("pk")
+        try:
+            user = self.model.objects.get(pk=pk)
+            user.groups.set(group_id_list)
+            user.user_permissions.set(permission_id_list)
+            res = {'code': 0, 'next_url': reverse("users:user_list"), 'result': '用户角色权限更新成功'}
+        except:
+            res = {'code': 1, 'next_url': reverse("users:user_list"), 'errmsg': '用户角色权限更新失败'}
+        return render(request, settings.JUMP_PAGE, res)
 
 
 

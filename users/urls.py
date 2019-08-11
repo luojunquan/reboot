@@ -15,4 +15,7 @@ urlpatterns = [
     path("logout/", views.LogoutView.as_view(), name='logout'),
     #用户详情页
     re_path('userdetail/(?P<pk>[0-9]+)?/$',user.UserDetailView.as_view(),name='user_detail'),
+    path('modifypasswd/',user.ModifyPwdView.as_view(),name='modify_pwd'),
+    #角色管理
+    re_path('usergrouppower/(?P<pk>[0-9]+)?/$', user.UserGroupPowerView.as_view(), name='user_group_power'),
 ]
