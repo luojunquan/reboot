@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'workorder.apps.WorkorderConfig',
     'cmdb.apps.CmdbConfig',
-    'dj_pagination',
+    # 'dj_pagination',
     'pure_pagination',
 ]
 
@@ -130,6 +130,13 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
+
+# 用访问的URL
+MEDIA_URL = '/media/'
+# 文件存储的位置例如model中定义的文件存储位置为 reboot/media/orderfiles/2019/06/aa.txt
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 
 JUMP_PAGE = "jump.html"
 
