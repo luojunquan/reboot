@@ -23,7 +23,7 @@ class WorkOrderApplyView(LoginRequiredMixin, View):
         forms = WorkOrderApplyForm(request.POST or None, request.FILES or None)
         if forms.is_valid():
             try:
-                print(forms.cleaned_data)
+                # print(forms.cleaned_data)
                 title = forms.cleaned_data["title"]
                 order_contents = forms.cleaned_data["order_contents"]
                 assign = forms.cleaned_data["assign"]
@@ -74,7 +74,17 @@ class WorkOrderListView(LoginRequiredMixin, PaginationMixin, ListView):
         context['keyword'] = self.keyword
         return context
 
+    def post(self, request, **kwargs):
+        pk = kwargs.get("pk")
+        work_order = self.model.objects.get(pk=pk)
 
+        if work_order.status == 0:
+            work_order.status = 3
+            work_order.handler = request.user
+            work_order.save()
+            return HttpResponseRedirect(reverse("workorder:list"))
+
+#工单详情列表
 class WorkOrderDetailView(LoginRequiredMixin, DetailView):
     """
     工单详情页，包括处理结果表单的填写
@@ -103,3 +113,35 @@ class WorkOrderDetailView(LoginRequiredMixin, DetailView):
                 return HttpResponseRedirect(reverse('workorder:list'))
             else:
                 return render(request, 'order/workorder_detail.html', {'work_order': work_order, 'errmsg': '必须填写处理结果！'})
+
+#工单历史
+class WorkOrderHistoryView(LoginRequiredMixin,PaginationMixin,ListView):
+    """
+    工单历史页，显示完成的工单和失败的工单
+    """
+    model = WorkOrder
+    template_name = "order/workorder_history.html"
+    context_object_name = "orderlist"
+    paginate_by = 3
+    keyword = ''
+
+    def get_queryset(self):
+        queryset = super(WorkOrderHistoryView, self).get_queryset()
+        # 只显示状态大于1的，即完成工单和失败工单
+        queryset = queryset.filter(status__gt=1)
+        # 如果不是sa组的用户只显示自己申请的工单，别人看不到你申请的工单，管理员可以看到所有工单
+        if 'OPS' not in [group.name for group in self.request.user.groups.all()]:
+            queryset = queryset.filter(applicant=self.request.user)
+        #搜索框里搜索设置
+        self.keyword = self.request.GET.get('keyword', '')
+        if self.keyword:
+            queryset = queryset.filter(Q(title__icontains = self.keyword)|
+                                       Q(order_contents__icontains = self.keyword)|
+                                       Q(result_desc__icontains=self.keyword))
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super(WorkOrderHistoryView, self).get_context_data(**kwargs)
+        context['keyword'] = self.keyword
+        return context
+
