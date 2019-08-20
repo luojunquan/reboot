@@ -26,14 +26,13 @@ class CmdbListView(LoginRequiredMixin,PaginationMixin,ListView):
         return queryset
 
     '''搜索框保留搜索字眼'''
-    def get_context_data(self, *, object_list=None, **kwargs):
+    def get_context_data(self, object_list=None, **kwargs):
         context = super(CmdbListView, self).get_context_data()
         context['keyword'] = self.keyword
         return context
 
     #删除用户的逻辑，前端ajax处理
     def delete(self, request, **kwargs):
-        print(QueryDict(request.body))
         cmdb_id = QueryDict(request.body).dict()
         print(cmdb_id)
         try:
