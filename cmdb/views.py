@@ -31,10 +31,9 @@ class CmdbListView(LoginRequiredMixin,PaginationMixin,ListView):
         context['keyword'] = self.keyword
         return context
 
-    #删除用户的逻辑，前端ajax处理
+    #删除服务器信息的逻辑，前端ajax处理
     def delete(self, request, **kwargs):
         cmdb_id = QueryDict(request.body).dict()
-        print(cmdb_id)
         try:
             Cmdbs.objects.filter(id=cmdb_id['id']).delete()
             ret = {'code': 0, 'result': '操作成功'}
