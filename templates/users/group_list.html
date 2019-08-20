@@ -136,8 +136,8 @@ $("#submit_button").click(function(){
             let errors_message = ''
             console.log(errmsgs)
             for(let index in errmsgs) {
-                console.log(index,errmsgs[index]);
-                console.log(index,errmsgs[index][0].message);
+                {#console.log(index,errmsgs[index]);#}
+                {#console.log(index,errmsgs[index][0].message);#}
                 errors_message += "<li>"+errmsgs[index][0].message+"</li>"
             };
             swal("操作失败", errors_message, "error");

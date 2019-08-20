@@ -120,6 +120,7 @@ $(document).ready(function() {
 
 $("tbody").on('click','.delete',function(){
     var work_order_id = $(this).attr('data-id');
+    console.log(work_order_id)
         $.ajax({
             type: "DELETE",
             url: "",     {#% url 'workorder:list' %#}

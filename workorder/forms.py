@@ -18,6 +18,7 @@ class WorkOrderApplyForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(WorkOrderApplyForm, self).__init__(*args, **kwargs)
         self.fields['assign'].choices = UserProfile.objects.filter(groups__name='OPS').values_list('id', 'name_cn')
+
 #工单处理
 class WorkOrderResultForm(forms.Form):
     result_desc = forms.CharField(widget=forms.Textarea(), required=True)

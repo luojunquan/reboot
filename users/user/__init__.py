@@ -9,6 +9,7 @@
 将用户方面的View直接分离出来，新建文件夹，在文件夹的init里写相关的代码，需要注意的是要在url里需要注意相关的url
 '''
 from django.contrib.auth.models import Permission, Group
+from django.db.models import Q
 from django.urls import reverse
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -21,7 +22,6 @@ from pure_pagination.mixins import PaginationMixin
 from reboot import settings
 from users.forms import UserProfileForm, UserUpdateForm
 from users.models import UserProfile
-
 
 
 class UserListView(LoginRequiredMixin,PaginationMixin,ListView):
@@ -38,26 +38,28 @@ class UserListView(LoginRequiredMixin,PaginationMixin,ListView):
     paginate_by = 3
     object = UserProfile
 
-    '''
-    功能：用户管理搜索功能
-    '''
+    '''功能：用户管理搜索功能'''
     def get_queryset(self):
         queryset = super(UserListView, self).get_queryset()
         self.keyword = self.request.GET.get('keyword','').strip()
-        print(self.keyword)
+        # print(self.keyword)
         if self.keyword:
             queryset = queryset.filter(Q(name_cn__icontains=self.keyword)|Q(username__icontains=self.keyword))
         return queryset
+
     '''搜索框保留搜索字眼'''
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(UserListView, self).get_context_data()
         context['keyword'] = self.keyword
         return context
 
+    '''添加用户'''
     def post(self,request):
         _userForm = UserProfileForm(request.POST)
+        # data1 = QueryDict(request.body).dict()
         if _userForm.is_valid():
             try:
+                '''设置默认的密码和默认激活'''
                 _userForm.cleaned_data['password'] = make_password('123456')
                 _userForm.cleaned_data['is_active'] = True
                 data = _userForm.cleaned_data
@@ -67,28 +69,34 @@ class UserListView(LoginRequiredMixin,PaginationMixin,ListView):
                 res = {'code': 1, 'result': '添加用户失败'}
         else:
             res = {'code': 1, 'result': _userForm.errors.as_json()}
+            # print(res)
         return JsonResponse(res,safe=True)
+
+    #删除用户的逻辑，前端ajax处理
+    def delete(self, request, **kwargs):
+        user_id = QueryDict(request.body).dict()
+        try:
+            UserProfile.objects.filter(pk=user_id['id']).delete()
+            ret = {'code': 0, 'result': '操作成功'}
+        except BaseException:
+            ret = {'code': 1, 'errmsg': '操作失败'}
+        return JsonResponse(ret)
 
 #用户描述页，也可以修改用户信息
 class UserDetailView(LoginRequiredMixin,DetailView):
-    '''
-    用户详情
-    '''
+    '''用户详情'''
     model = UserProfile
     template_name = 'users/user_edit.html'
     context_object_name = 'user'
 
-    """
-     更新用户信息
-    """
-
+    """更新用户信息"""
     def post(self, request, **kwargs):
-        print(request.POST)  # <QueryDict: {'id': ['7'], 'username': ['aa'], 'name_cn': ['bb'], 'phone': ['13305779168']}>
-        print(kwargs)  # {'pk': '7'}
-        print(request.body)  # b'id=7&username=aa&name_cn=bb&phone=13305779168'
+        # print(request.POST)  # <QueryDict: {'id': ['7'], 'username': ['aa'], 'name_cn': ['bb'], 'phone': ['13305779168']}>
+        # print(kwargs)  # {'pk': '7'}
+        # print(request.body)  # b'id=7&username=aa&name_cn=bb&phone=13305779168'
         pk = kwargs.get("pk")
         data = QueryDict(request.body).dict()
-        print(data)  # {'id': '7', 'username': 'aa', 'name_cn': 'bb', 'phone': '13305779168'}
+        # print(data)  # {'id': '7', 'username': 'aa', 'name_cn': 'bb', 'phone': '13305779168'}
         _userForm = UserUpdateForm(request.POST)
         if _userForm.is_valid():
             try:
@@ -99,7 +107,7 @@ class UserDetailView(LoginRequiredMixin,DetailView):
 
         else:
             # 获取所有的表单错误
-            print(_userForm.errors)
+            # print(_userForm.errors)
             res = {'code': 1, "next_url": reverse("users:user_list"), 'errmsg': _userForm.errors}
         return render(request, settings.JUMP_PAGE, res)
 
