@@ -69,6 +69,7 @@
                 <th class="text-center">姓名</th>
                 <th class="text-center">小组</th>
                 <th class="text-center">手机</th>
+                <th class="text-center">邮箱</th>
                 <th class="text-center">激活</th>
                 <th class="text-center">操作</th>
             </tr>
@@ -80,6 +81,7 @@
                    <td class="text-center"> {{ user.name_cn }} </td>
                    <td class="text-center"> {{ user.groups.all | group_str2 |default:'Nothing'}} </td>
                    <td class="text-center">{{ user.phone | default_if_none:'' }}</td>
+                    <td class="text-center">{{ user.email | default_if_none:'' }}</td>
                    <td class="text-center">{{ user.is_active | bool2str}}</td>
 
                   <td class="text-center">
@@ -135,7 +137,7 @@ $("#addbtn").click(function(){
 /*添加用户*/
 $("#submit_button").click(function(){
     var formdata = $('#AddForm').serialize()
-    console.log(formdata)
+    {#console.log(formdata)#}
     $.post('', formdata, function(res){
         if (res.code == 0) {
             swal({
@@ -148,15 +150,20 @@ $("#submit_button").click(function(){
                  }, 50);
              })
         } else {
-            let errmsgs = $.parseJSON(res.errmsg);
+            let errmsgs = $.parseJSON(res.result);
             let errors_message = ''
-            console.log(errmsgs)
             for(let index in errmsgs) {
-                console.log(index,errmsgs[index]);
-                console.log(index,errmsgs[index][0].message);
-                errors_message += "<li>"+errmsgs[index][0].message+"</li>"
+                {#console.log(index,errmsgs[index]);#}
+                {#console.log(index,errmsgs[index][1].message);#}
+                {#console.log(index)#}
+                console.log(index)
+                errors_message += errmsgs[index][0].message
             };
-            swal("操作失败", errors_message, "error");
+             swal({
+                "title": "操作失败",
+                 "text": errors_message,
+                 "type": "error"
+            });
          }
     })
     return false;
