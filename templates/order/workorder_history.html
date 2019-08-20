@@ -1,8 +1,6 @@
 {% extends "base.html" %}
 {% block title %}工单历史{% endblock %}
-
 {% load tags %}
-
 {% block breadcrunb %}
   <h1>
     通用工单系统
@@ -70,7 +68,7 @@
             <td class="text-center" data-toggle="true">{{ work_order.title }}</td>
             <td class="text-center"> {{ work_order.applicant.name_cn }} </td>
             <td class="text-center"> {{ work_order.assign.name_cn }} </td>
-            <td class="text-center"><span class="label {% if work_order.status == 2 %}label-success{% elif work_order.status == 1 %}label-warning{% endif %}">{{ work_order.get_status_display }}</span></td>
+            <td class="text-center"><span class="label {% if work_order.status == 2 %}label-success{% elif work_order.status == 1 %}label-warning{% elif work_order.status == 3 %}label-warning{% endif %}">{{ work_order.get_status_display }}</span></td>
             <td class="text-center"> {{ work_order.handler.name_cn }} </td>
             <td class="text-center">{{ work_order.apply_time}}</td>
              <td class="text-center">{{ work_order.complete_time}}</td>
@@ -80,14 +78,12 @@
 </table>
 
 </div><!-- /.table-responsive -->
-
 <div class="row">
   <div class="col-sm-6">
      <div class="dataTables_info" id="editable_info" role="status" aria-live="polite">
          显示 [{{ paginator.count }}] 条数据中的 第 [{{ page_obj.start_index}}] 至 [{{ page_obj.end_index }}] 的数据
      </div>
   </div>
-
   {% include 'paginator.html' %}
 </div><!-- /.paginator -->
 

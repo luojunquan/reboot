@@ -72,6 +72,16 @@ class UserListView(LoginRequiredMixin,PaginationMixin,ListView):
             # print(res)
         return JsonResponse(res,safe=True)
 
+    #删除用户的逻辑，前端ajax处理
+    def delete(self, request, **kwargs):
+        user_id = QueryDict(request.body).dict()
+        try:
+            UserProfile.objects.filter(pk=user_id['id']).delete()
+            ret = {'code': 0, 'result': '操作成功'}
+        except BaseException:
+            ret = {'code': 1, 'errmsg': '操作失败'}
+        return JsonResponse(ret)
+
 #用户描述页，也可以修改用户信息
 class UserDetailView(LoginRequiredMixin,DetailView):
     '''用户详情'''

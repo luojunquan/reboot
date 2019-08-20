@@ -51,7 +51,7 @@ class WorkOrderListView(LoginRequiredMixin, PaginationMixin, ListView):
     model = WorkOrder
     template_name = 'order/workorder_list.html'
     context_object_name = "orderlist"
-    paginate_by = 10
+    paginate_by = 2
     keyword = ''
 
     def get_queryset(self):
@@ -74,15 +74,20 @@ class WorkOrderListView(LoginRequiredMixin, PaginationMixin, ListView):
         context['keyword'] = self.keyword
         return context
 
-    def post(self, request, **kwargs):
-        pk = kwargs.get("pk")
-        work_order = self.model.objects.get(pk=pk)
-
-        if work_order.status == 0:
-            work_order.status = 3
-            work_order.handler = request.user
-            work_order.save()
-            return HttpResponseRedirect(reverse("workorder:list"))
+    #取消工单的逻辑
+    def delete(self, request, **kwargs):
+        pkid = QueryDict(request.body).dict()
+        try:
+            #获取取消工单的用户名
+            work_order = WorkOrder.objects.get(id=pkid['id'])
+            if work_order.status == 0:
+                work_order.status = 3
+                work_order.handler = request.user
+                work_order.save()
+                ret = {'code': 0, 'result': '工单取消成功'}
+        except BaseException:
+            ret = {'code': 1, 'errmsg': '工单取消失败'}
+        return JsonResponse(ret)
 
 #工单详情列表
 class WorkOrderDetailView(LoginRequiredMixin, DetailView):

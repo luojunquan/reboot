@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'workorder.apps.WorkorderConfig',
     'cmdb.apps.CmdbConfig',
-    # 'dj_pagination',
+    'dj_pagination',
     'pure_pagination',
 ]
 
