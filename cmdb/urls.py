@@ -11,4 +11,5 @@ urlpatterns = [
     path("host_list/", views.CmdbListView.as_view(), name='host_list'),
     #正则表达式匹配
     re_path('host_delete/(?P<pk>[0-9]+)/$', views.CmdbDeleteView.as_view(),name='cmdb_delete'),
+    path("host_map/", views.CmdbHostMapView.as_view(), name='host_map'),
 ]

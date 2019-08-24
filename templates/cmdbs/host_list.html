@@ -1,5 +1,7 @@
 {% extends "base.html" %}
+{% load cmdbtags %}
 {% block title %}主机管理列表{% endblock %}
+
 {% block breadcrunb %}
 <h1>主机管理列表</h1>
 <ol class="breadcrumb">
@@ -7,10 +9,19 @@
     <li class="active">主机管理列表</li>
 </ol>
 {% endblock %}
+{#下面样式为弹出框的样式#}
+{% block css %}
+<style>
+.form-horizontal .form-group{margin-bottom:13px;width:100%;}
+.form-horizontal  .form-control{width:86%;}
+.form-horizontal .control-label{width:75px;}
+</style>
+{% endblock %}
+
 {% block content %}
- <!-- 搜索栏 -->
+    <!-- 搜索栏 -->
      <div style="margin-bottom: 10px;height: 30px" class="row">
-        <a style="float: left; margin-left: 1%" class="btn btn-sm btn-primary" id = "addbtn"> 添加服务器信息 </a>
+        <a style="float: left; margin-left: 1%" class="btn btn-sm btn-primary" id = "addhostbtn"> 添加服务器信息 </a>
         <form style="float: right;width: 20%;margin-right: 1%">
         <div  class="input-group">
             <input type="text" class="form-control" name="keyword"
@@ -21,15 +32,20 @@
         </div>
         </form>
      </div>
+    <!-- 引入添加模态窗 -->
+{% include "cmdbs/cmdbddmodel.html" %}
     <table class="table table-striped">
         <thead>
             <tr>
                 <th>序号</th>
                 <th>id</th>
+                <th>服务器状态</th>
                 <th>主机名</th>
                 <th>内网ip</th>
                 <th>cpu</th>
-                <th>制造商</th>
+                <th>磁盘容量</th>
+                <th>MAC地址</th>
+                <th>操作系统</th>
                 <th>创建时间</th>
                 <th>更新时间</th>
                 <th>操作</th>
@@ -40,15 +56,18 @@
             <tr>
                 <td>{{ forloop.counter }}</td>
                 <td>{{ obj.id }}</td>
+                <td>{{ obj.vm_status | vmstatus}}</td>
                 <td>{{ obj.hostname }}</td>
                 <td>{{ obj.private_ip }}</td>
                 <td>{{ obj.cpu }}</td>
-                <td>{{ obj.manufacturers }}</td>
+                <td>{{ obj.disk }}</td>
+                <td>{{ obj.mac_address }}</td>
+                <td>{{ obj.os }}</td>
                 <td>{{ obj.create_time }}</td>
                 <td>{{ obj.update_time }}</td>
                 <td>
-                    <button class="btn btn-danger del">删除</button>
-                    <button type="button" class="btn btn-info" id = "modifyhost">修改</button>
+                    <a class="btn btn-danger btn-sm del" data-id="{{ obj.id }}">删除</a>
+                    <a class="btn btn-primary btn-sm del" id = "modifyhost">修改</a>
                 </td>
             </tr>
             {% endfor %}
@@ -65,41 +84,71 @@
 {% endblock %}
 {% block js %}
 <script>
-/*添加用户模态窗弹出*/
-$("#modifyhost").click(function(){
-    $("#user_add_modal").modal("show");
+/*添加服务器信息状态窗弹出*/
+$("#addhostbtn").click(function(){
+    $("#cmdb_add_modal").modal("show");
 });
 
-$("tbody").on('click','.del',function(){
-    if(confirm("是否确认删除？")){
-        let that = this;
-        let id = $(this).attr('data-id');
-        console.log(id);
-        $.ajax({
-            url:"",
-            type: "DELETE",
-            data: {"id":id},
-            datatype: "json",
-            success: function(res){
-                console.log(res)
-                if (res.code ==0){
-                    swal({
-                        "title": "删除服务器信息成功",
-                         "text": res.result,
-                         "type": "success"
-                    }, function () {
-                         setTimeout(function () {
-                            window.location.reload();
-                         }, 50);
-                     })
-                }else{
-                    swal("操作失败", res.errmsg, "error")
-                }
-            }
-        })
+/*添加服务器*/
+$("#submit_add_cmdb").click(function(){
+    var formdata = $('#CmdbAddForm').serialize();
+    $.post('', formdata, function(res){
+        console.log(res.code);
+        console.log(res.result);
+        if (res.code == 0) {
+            swal({
+                "title": "添加成功",
+                 "text": res.result,
+                 "type": "success"
+            }, function () {
+                 setTimeout(function () {
+                    window.location.reload();
+                 }, 50);
+             })
+        } else {
+            let errmsgs = $.parseJSON(res.result);
+            let errors_message = '';
+            for(let index in errmsgs) {
+                {#console.log(index,errmsgs[index]);#}
+                {#console.log(index,errmsgs[index][1].message);#}
+                {#console.log(index)#}
+                console.log(index);
+                errors_message += errmsgs[index][0].message
+            };
+             swal({
+                "title": "操作失败",
+                 "text": errors_message,
+                 "type": "error"
+            });
+         }
+    });
+    return false;
+});
 
-    }  // end confirm
-     return false
+{#删除服务器信息#}
+$("tbody").on('click','.del',function(){
+    var work_order_id = $(this).attr('data-id');
+    console.log(work_order_id);
+        $.ajax({
+            type: "DELETE",
+            url: "",     {#% url 'workorder:list' %#}
+            data:{"id": work_order_id},
+            success: function(data){
+                console.log(data);
+                if (data['code']== 0){
+                        swal({
+                            title: "是",
+                            text: "成功删除服务器信息！",
+                            type: "success",
+                            confirmButtonText: "确定"
+                        }, function () {
+                             location.reload()
+                        });
+               }else{
+                        swal("Error", data['errmsg'], "error")
+               }
+         }
+        });
 })
 </script>
 {% endblock js %}

@@ -1,0 +1,58 @@
+<!--添加用户模态窗 -->
+<div class="modal fade" tabindex="-1"  id="cmdb_add_modal" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+         <div class="modal-header">
+             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+             <h4 class="modal-title">添加服务器资产信息</h4>
+        </div>
+
+        <div class="modal-body form-inline">
+             <form  class="form-horizontal" id = "CmdbAddForm">
+                <div class="form-group">
+                    <label class="control-label">主机名：</label>
+                    <input type="text" name="hostname" class="form-control" required="">
+                </div>
+                <hr>
+
+                <div class="form-group">
+                    <label class="control-label">内网IP：</label>
+                    <input type="text" name="private_ip" class="form-control" required="">
+                </div>
+                <hr>
+
+                <div class="form-group">
+                    <label class="control-label">CPU：</label>
+                    <input type="text" name='cpu' placeholder="" class="form-control" required="">
+                </div>
+                <hr>
+
+                <div class="form-group">
+                    <label class="control-label">磁盘容量：</label>
+                    <input type="email" name='disk' placeholder="" class="form-control" required="">
+                </div>
+                <hr>
+
+                <div class="form-group">
+                    <label class="control-label">MAC地址：</label>
+                    <input type="email" name='mac_address' placeholder="" class="form-control" required="">
+                </div>
+                <hr>
+
+                <div class="form-group">
+                    <label class="control-label">操作系统：</label>
+                    <input type="email" name='os' placeholder="" class="form-control" required="">
+                </div>
+                <hr>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="submit_add_cmdb">确认</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                </div>
+             </form>
+
+         </div>
+    </div>
+</div>
+</div>
+<!--添加用户模态窗结束 -->

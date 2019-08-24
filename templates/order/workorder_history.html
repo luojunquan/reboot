@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}工单历史{% endblock %}
-{% load tags %}
+{% load userstags %}
 {% block breadcrunb %}
   <h1>
     通用工单系统
@@ -107,6 +107,7 @@ $(document).ready(function() {
 
 $("tbody").on('click','.delete',function(){
     var work_order_id = $(this).attr('data-id');
+    console.log(work_order_id);
         $.ajax({
             type: "DELETE",
             url: "",     {#% url 'workorder:list' %#}
